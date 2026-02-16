@@ -38,28 +38,55 @@ CONFIG_PATH = os.path.join(
     "config.json"
 )
 
+# ---------- DEFAULT CONFIG (REORDERED) ----------
 DEFAULT_CONTENT = {
-    # Toolbar
+
+    # ---------------- Toolbar ----------------
+    "toolbar_save": "Save Config",
+    "toolbar_save_tooltip": "Save current form as project config file",
+
+    "toolbar_load": "Load Config",
+    "toolbar_load_tooltip": "Load previously saved project config file",
+
     "toolbar_configure": "Configure",
     "toolbar_configure_tooltip": "Open configuration file",
+
     "toolbar_about": "About",
     "toolbar_about_tooltip": "About the program",
+
     "toolbar_coffee": "Coffee",
     "toolbar_coffee_tooltip": "Buy me a coffee (TrucomanX)",
 
-    # GUI text
+
+    # ---------------- Labels ----------------
     "label_template": "Template:",
     "label_output_dir": "Output directory:",
-    "button_generate": "Generate Project",
-    "button_browse": "Browse",
-    "toolbar_save": "Save Config",
-    "toolbar_load": "Load Config",
 
-    # Messages
+
+    # ---------------- Buttons ----------------
+    "button_generate": "Generate Project",
+    "button_generate_tooltip": "Generate project using selected template",
+
+    "button_browse": "Browse",
+    "button_browse_tooltip": "Select output directory",
+
+
+    # ---------------- Placeholders ----------------
+    "placeholder_output_dir": "Select output directory...",
+
+
+    # ---------------- Tooltips (Form fields) ----------------
+    "tooltip_template_selector": "Select a template to generate the project from",
+    "tooltip_output_dir_input": "Directory where the project will be created",
+
+
+    # ---------------- Messages ----------------
     "msg_success": "Project generated successfully!",
     "msg_extract_error": "Failed to extract template",
     "msg_invalid_template": "Invalid template selected",
 
+
+    # ---------------- Window ----------------
     "window_width": 1024,
     "window_height": 800
 }
@@ -67,10 +94,13 @@ DEFAULT_CONTENT = {
 configure.verify_default_config(CONFIG_PATH, default_content=DEFAULT_CONTENT)
 CONFIG = configure.load_config(CONFIG_PATH)
 
-# ---------------------------------------
 
+# ============================================================
+#                         MAIN WINDOW
+# ============================================================
 
 class MainWindow(QMainWindow):
+
     def __init__(self):
         super().__init__()
 
@@ -88,7 +118,9 @@ class MainWindow(QMainWindow):
         self._create_toolbar()
         self._generate_ui()
 
-    # ---------------- UI ----------------
+    # ============================================================
+    # UI
+    # ============================================================
 
     def _generate_ui(self):
 
@@ -96,23 +128,28 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout()
         form_layout = QFormLayout()
 
-        # Template selector
+        # ---------------- Template selector ----------------
         self.template_selector = QComboBox()
         for keyname in self.template_map:
             self.template_selector.addItem(keyname)
+
+        self.template_selector.setToolTip(CONFIG["tooltip_template_selector"])
+
         form_layout.addRow(CONFIG["label_template"], self.template_selector)
 
-        # Output directory selector (single row)
+        # ---------------- Output directory (single row) ----------------
         output_widget = QWidget()
         output_layout = QHBoxLayout()
         output_layout.setContentsMargins(0, 0, 0, 0)
 
         self.output_dir_input = QLineEdit()
-        self.output_dir_input.setPlaceholderText("Select output directory...")
+        self.output_dir_input.setPlaceholderText(CONFIG["placeholder_output_dir"])
+        self.output_dir_input.setToolTip(CONFIG["tooltip_output_dir_input"])
 
         self.output_browse_button = QPushButton(CONFIG["button_browse"])
         self.output_browse_button.setIcon(QIcon.fromTheme("folder-open"))
         self.output_browse_button.setFixedWidth(110)
+        self.output_browse_button.setToolTip(CONFIG["button_browse_tooltip"])
         self.output_browse_button.clicked.connect(self.select_output_directory)
 
         output_layout.addWidget(self.output_dir_input)
@@ -122,8 +159,7 @@ class MainWindow(QMainWindow):
 
         form_layout.addRow(CONFIG["label_output_dir"], output_widget)
 
-
-        # Replacement fields (user-friendly labels)
+        # ---------------- Replacement fields ----------------
         self.fields = {}
 
         field_map = {
@@ -144,8 +180,9 @@ class MainWindow(QMainWindow):
             form_layout.addRow(label, line)
             self.fields[key] = line
 
-        # Generate button
+        # ---------------- Generate button ----------------
         self.generate_button = QPushButton(CONFIG["button_generate"])
+        self.generate_button.setToolTip(CONFIG["button_generate_tooltip"])
         self.generate_button.clicked.connect(self.on_generate_clicked)
 
         layout.addLayout(form_layout)
@@ -154,28 +191,32 @@ class MainWindow(QMainWindow):
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
 
-    # ---------------- Toolbar ----------------
+    # ============================================================
+    # Toolbar
+    # ============================================================
 
     def _create_toolbar(self):
 
         self.toolbar = self.addToolBar("Main")
         self.toolbar.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
 
-        # Save config
+        # ---------------- Save ----------------
         self.save_action = QAction(
             QIcon.fromTheme("document-save"),
             CONFIG["toolbar_save"],
             self
         )
+        self.save_action.setToolTip(CONFIG["toolbar_save_tooltip"])
         self.save_action.triggered.connect(self.save_config_json)
         self.toolbar.addAction(self.save_action)
 
-        # Load config
+        # ---------------- Load ----------------
         self.load_action = QAction(
             QIcon.fromTheme("document-open"),
             CONFIG["toolbar_load"],
             self
         )
+        self.load_action.setToolTip(CONFIG["toolbar_load_tooltip"])
         self.load_action.triggered.connect(self.load_config_json)
         self.toolbar.addAction(self.load_action)
 
@@ -184,7 +225,7 @@ class MainWindow(QMainWindow):
         spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.toolbar.addWidget(spacer)
 
-        # Configure
+        # ---------------- Configure ----------------
         configure_action = QAction(
             QIcon.fromTheme("document-properties"),
             CONFIG["toolbar_configure"],
@@ -194,7 +235,7 @@ class MainWindow(QMainWindow):
         configure_action.triggered.connect(self.open_configure_editor)
         self.toolbar.addAction(configure_action)
 
-        # About
+        # ---------------- About ----------------
         about_action = QAction(
             QIcon.fromTheme("help-about"),
             CONFIG["toolbar_about"],
@@ -204,7 +245,7 @@ class MainWindow(QMainWindow):
         about_action.triggered.connect(self.open_about)
         self.toolbar.addAction(about_action)
 
-        # Coffee
+        # ---------------- Coffee ----------------
         coffee_action = QAction(
             QIcon.fromTheme("emblem-favorite"),
             CONFIG["toolbar_coffee"],
@@ -214,7 +255,9 @@ class MainWindow(QMainWindow):
         coffee_action.triggered.connect(self.on_coffee_action_click)
         self.toolbar.addAction(coffee_action)
 
-    # ---------------- Output Directory ----------------
+    # ============================================================
+    # Output Directory
+    # ============================================================
 
     def select_output_directory(self):
         directory = QFileDialog.getExistingDirectory(
@@ -224,7 +267,9 @@ class MainWindow(QMainWindow):
         if directory:
             self.output_dir_input.setText(directory)
 
-    # ---------------- Generator ----------------
+    # ============================================================
+    # Generator
+    # ============================================================
 
     def on_generate_clicked(self):
 
@@ -316,7 +361,9 @@ class MainWindow(QMainWindow):
             if key in self.fields:
                 self.fields[key].setText(value)
 
-    # ---------------- Misc ----------------
+    # ============================================================
+    # Misc
+    # ============================================================
 
     def open_configure_editor(self):
         if os.name == 'nt':
@@ -343,7 +390,9 @@ class MainWindow(QMainWindow):
         QDesktopServices.openUrl(QUrl("https://ko-fi.com/trucomanx"))
 
 
-# ---------------- Main ----------------
+# ============================================================
+# Main
+# ============================================================
 
 def main():
     signal.signal(signal.SIGINT, signal.SIG_DFL)
