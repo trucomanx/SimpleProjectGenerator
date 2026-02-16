@@ -75,9 +75,64 @@ DEFAULT_CONTENT = {
     "placeholder_output_dir": "Select output directory...",
 
 
-    # ---------------- Tooltips (Form fields) ----------------
+    # ---------------- Tooltips (Main Fields) ----------------
     "tooltip_template_selector": "Select a template to generate the project from",
     "tooltip_output_dir_input": "Directory where the project will be created",
+
+
+    # ---------------- Field Map Text Config ----------------
+    "fields": {
+        "{MODULE_NAME}": {
+            "label": "Module name:",
+            "placeholder": "example_module",
+            "tooltip": "Python module/package name (lowercase, no spaces)"
+        },
+        "{PROGRAM_NAME}": {
+            "label": "Program name:",
+            "placeholder": "my-awesome-program",
+            "tooltip": "The program name used when called from the system"
+        },
+        "{AUTHOR_NAME}": {
+            "label": "Author name:",
+            "placeholder": "John Doe",
+            "tooltip": "Full author name"
+        },
+        "{AUTHOR_EMAIL}": {
+            "label": "Author email:",
+            "placeholder": "john@example.com",
+            "tooltip": "Contact email address"
+        },
+        "{SUMMARY}": {
+            "label": "Summary:",
+            "placeholder": "Short description of the project",
+            "tooltip": "One-line summary used in metadata"
+        },
+        "{REPOSITORY_PAGE}": {
+            "label": "Repository page:",
+            "placeholder": "https://github.com/trucomanx",
+            "tooltip": "Repository URL"
+        },
+        "{REPOSITORY_NAME}": {
+            "label": "Repository name:",
+            "placeholder": "MyAwesomeProgram",
+            "tooltip": "Repository short name, this is used to generate https://github.com/trucomanx/MyAwesomeProgram"
+        },
+        "{FUNDING_PAGE}": {
+            "label": "Funding page:",
+            "placeholder": "https://trucomanx.github.io/en/funding.html",
+            "tooltip": "Funding or sponsorship URL"
+        },
+        "{BUY_ME_A_COFFEE}": {
+            "label": "Buy me a coffee URL:",
+            "placeholder": "https://ko-fi.com/trucomanx",
+            "tooltip": "Coffee donation page"
+        },
+        "{REPOSITORY_RAW_PAGE}": {
+            "label": "Repository raw page:",
+            "placeholder": "https://raw.githubusercontent.com/trucomanx",
+            "tooltip": "Raw content base URL"
+        }
+    },
 
 
     # ---------------- Messages ----------------
@@ -87,8 +142,8 @@ DEFAULT_CONTENT = {
 
 
     # ---------------- Window ----------------
-    "window_width": 1024,
-    "window_height": 800
+    "window_width": 800,
+    "window_height": 600
 }
 
 configure.verify_default_config(CONFIG_PATH, default_content=DEFAULT_CONTENT)
@@ -96,7 +151,7 @@ CONFIG = configure.load_config(CONFIG_PATH)
 
 
 # ============================================================
-#                         MAIN WINDOW
+# MAIN WINDOW
 # ============================================================
 
 class MainWindow(QMainWindow):
@@ -111,7 +166,7 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon(self.icon_path))
 
         self.template_map = {
-            "GUI template 1": resource_path("data", "pyqt5_project_template_1.zip"),
+            "GUI pyqt5 template 1": resource_path("data", "pyqt5_project_template_1.zip"),
             "CMD template 1": resource_path("data", "pyqt5_project_template_1.zip")
         }
 
@@ -137,7 +192,7 @@ class MainWindow(QMainWindow):
 
         form_layout.addRow(CONFIG["label_template"], self.template_selector)
 
-        # ---------------- Output directory (single row) ----------------
+        # ---------------- Output directory ----------------
         output_widget = QWidget()
         output_layout = QHBoxLayout()
         output_layout.setContentsMargins(0, 0, 0, 0)
@@ -158,26 +213,19 @@ class MainWindow(QMainWindow):
         output_widget.setLayout(output_layout)
 
         form_layout.addRow(CONFIG["label_output_dir"], output_widget)
+        
+        form_layout.addRow(" ", None)
 
-        # ---------------- Replacement fields ----------------
+        # ---------------- Dynamic fields ----------------
         self.fields = {}
 
-        field_map = {
-            "Module name:": "{MODULE_NAME}",
-            "Program name:": "{PROGRAM_NAME}",
-            "Author name:": "{AUTHOR_NAME}",
-            "Author email:": "{AUTHOR_EMAIL}",
-            "Summary:": "{SUMMARY}",
-            "Repository page:": "{REPOSITORY_PAGE}",
-            "Repository name:": "{REPOSITORY_NAME}",
-            "Funding page:": "{FUNDING_PAGE}",
-            "Buy me a coffee URL:": "{BUY_ME_A_COFFEE}",
-            "Repository raw page:": "{REPOSITORY_RAW_PAGE}",
-        }
+        for key, field_data in CONFIG["fields"].items():
 
-        for label, key in field_map.items():
             line = QLineEdit()
-            form_layout.addRow(label, line)
+            line.setPlaceholderText(field_data["placeholder"])
+            line.setToolTip(field_data["tooltip"])
+
+            form_layout.addRow(field_data["label"], line)
             self.fields[key] = line
 
         # ---------------- Generate button ----------------
@@ -256,7 +304,7 @@ class MainWindow(QMainWindow):
         self.toolbar.addAction(coffee_action)
 
     # ============================================================
-    # Output Directory
+    # Logic (rest unchanged)
     # ============================================================
 
     def select_output_directory(self):
