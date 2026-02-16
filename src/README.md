@@ -36,3 +36,4 @@ Your donations help keep the project running and improve future updates.
 ## 4. License
 
 This project is licensed under the GPL license. See the `LICENSE` file for more details.
+
