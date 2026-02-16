@@ -8,7 +8,7 @@ import shutil
 
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QSizePolicy, QAction,
-    QFormLayout, QLineEdit, QPushButton, QVBoxLayout,
+    QFormLayout, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, 
     QFileDialog, QMessageBox, QComboBox, QLabel
 )
 from PyQt5.QtCore import Qt, QUrl
@@ -102,21 +102,26 @@ class MainWindow(QMainWindow):
             self.template_selector.addItem(keyname)
         form_layout.addRow(CONFIG["label_template"], self.template_selector)
 
-        # Output directory selector
+        # Output directory selector (single row)
         output_widget = QWidget()
-        output_layout = QVBoxLayout()
+        output_layout = QHBoxLayout()
         output_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.output_dir_input = QLineEdit("output")
+        self.output_dir_input = QLineEdit()
+        self.output_dir_input.setPlaceholderText("Select output directory...")
+
         self.output_browse_button = QPushButton(CONFIG["button_browse"])
         self.output_browse_button.setIcon(QIcon.fromTheme("folder-open"))
+        self.output_browse_button.setFixedWidth(110)
         self.output_browse_button.clicked.connect(self.select_output_directory)
 
         output_layout.addWidget(self.output_dir_input)
         output_layout.addWidget(self.output_browse_button)
+
         output_widget.setLayout(output_layout)
 
         form_layout.addRow(CONFIG["label_output_dir"], output_widget)
+
 
         # Replacement fields (user-friendly labels)
         self.fields = {}
