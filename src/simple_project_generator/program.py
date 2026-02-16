@@ -167,7 +167,7 @@ class MainWindow(QMainWindow):
 
         self.template_map = {
             "GUI pyqt5 template 1": resource_path("data", "pyqt5_project_template_1.zip"),
-            "CMD template 1": resource_path("data", "pyqt5_project_template_1.zip")
+            "CMD template 1": resource_path("data", "cmd_project_template_1.zip")
         }
 
         self._create_toolbar()
@@ -335,10 +335,24 @@ class MainWindow(QMainWindow):
         for key, field in self.fields.items():
             value = field.text().strip()
 
+            # ------------------------------------------------------
+            # Normalize URLs (remove trailing slash if exists)
+            # ------------------------------------------------------
+            if key in ("{REPOSITORY_PAGE}", "{REPOSITORY_RAW_PAGE}"):
+                value = value.rstrip("/")
+                if not value.startswith(("http://", "https://")):
+                    QMessageBox.warning(
+                        self,
+                        "Invalid URL",
+                        f"{CONFIG['fields'][key]['label']} must start with http:// or https://"
+                    )
+                    return
+
             if not value:
                 empty_fields.append(CONFIG["fields"][key]["label"])
 
             replacements[key] = value
+
 
         if empty_fields:
             QMessageBox.warning(
