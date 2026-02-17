@@ -30,6 +30,33 @@ from simple_project_generator.modules.project_generator import (
     generate_project
 )
 
+# ---------- Path to project file ----------
+DEFAULT_PROJECT_PATH = os.path.join(
+    os.path.expanduser("~"),
+    ".config",
+    about.__package__,
+    "default.myproject.json"
+)
+
+DEFAULT_PROJECT_CONTENT = {
+    "template": "GUI pyqt5 template 1",
+    "output_dir": os.path.join(os.path.expanduser("~"),"output"),
+    "replacements": {
+        "{MODULE_NAME}": "programa_teste",
+        "{PROGRAM_NAME}": "programa-teste",
+        "{AUTHOR_NAME}": "Fernando Pujaico Rivera",
+        "{AUTHOR_EMAIL}": "fernando.pujaico.rivera@gmail.com",
+        "{SUMMARY}": "Programa de teste",
+        "{REPOSITORY_PAGE}": "https://github.com/trucomanx",
+        "{REPOSITORY_NAME}": "ProgramaTeste",
+        "{FUNDING_PAGE}": "https://trucomanx.github.io/en/funding.html",
+        "{BUY_ME_A_COFFEE}": "https://ko-fi.com/trucomanx",
+        "{REPOSITORY_RAW_PAGE}": "https://raw.githubusercontent.com/trucomanx"
+    }
+}
+
+configure.verify_default_config(DEFAULT_PROJECT_PATH, default_content=DEFAULT_PROJECT_CONTENT)
+
 # ---------- Path to config file ----------
 CONFIG_PATH = os.path.join(
     os.path.expanduser("~"),
@@ -38,18 +65,23 @@ CONFIG_PATH = os.path.join(
     "config.json"
 )
 
-# ---------- DEFAULT CONFIG (REORDERED) ----------
 DEFAULT_CONTENT = {
 
     # ---------------- Toolbar ----------------
-    "toolbar_save": "Save Config",
-    "toolbar_save_tooltip": "Save current form as project config file",
+    "toolbar_save": "Save Template",
+    "toolbar_save_tooltip": "Save current form as project file",
 
-    "toolbar_load": "Load Config",
-    "toolbar_load_tooltip": "Load previously saved project config file",
+    "toolbar_load": "Load Template",
+    "toolbar_load_tooltip": "Load previously saved project file",
+    
+    "toolbar_load_default": "Load Default",
+    "toolbar_load_default_tooltip": "Load default project file",
+
+    "toolbar_edit_default": "Edit Default",
+    "toolbar_edit_default_tooltip": "Edit default project file",
 
     "toolbar_configure": "Configure",
-    "toolbar_configure_tooltip": "Open configuration file",
+    "toolbar_configure_tooltip": "Open configuration file of window",
 
     "toolbar_about": "About",
     "toolbar_about_tooltip": "About the program",
@@ -268,10 +300,31 @@ class MainWindow(QMainWindow):
         self.load_action.triggered.connect(self.load_config_json)
         self.toolbar.addAction(self.load_action)
 
+        # ---------------- Load template ----------------
+        self.load_default_action = QAction(
+            QIcon.fromTheme("document-open"),
+            CONFIG["toolbar_load_default"],
+            self
+        )
+        self.load_default_action.setToolTip(CONFIG["toolbar_load_default_tooltip"])
+        self.load_default_action.triggered.connect(self.load_default_config_json)
+        self.toolbar.addAction(self.load_default_action)
+
+        # --------------------------------------
         # Spacer
         spacer = QWidget()
         spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.toolbar.addWidget(spacer)
+
+        # ---------------- edit template ----------------
+        self.edit_default_action = QAction(
+            QIcon.fromTheme("document-properties"),
+            CONFIG["toolbar_edit_default"],
+            self
+        )
+        self.edit_default_action.setToolTip(CONFIG["toolbar_edit_default_tooltip"])
+        self.edit_default_action.triggered.connect(self.open_default_json)
+        self.toolbar.addAction(self.edit_default_action)
 
         # ---------------- Configure ----------------
         configure_action = QAction(
@@ -375,12 +428,15 @@ class MainWindow(QMainWindow):
             return
 
         if not os.path.isdir(output_dir):
-            QMessageBox.warning(
-                self,
-                "Invalid directory",
-                "The selected output directory is not valid."
-            )
-            return
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir, exist_ok=True)
+            else:
+                QMessageBox.warning(
+                    self,
+                    "Invalid directory",
+                    "The selected output directory is not valid."
+                )
+                return
 
         # ---------------- Extract template ----------------
         temp_path = extract_zip_to_temp(template_path)
@@ -436,6 +492,32 @@ class MainWindow(QMainWindow):
         with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4)
 
+    def _load_from_path(self, path):
+        if not path:
+            return
+        
+        if not os.path.isfile(path):
+            return
+
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+       
+        template_name = data.get("template", "")
+        index = self.template_selector.findText(template_name, Qt.MatchExactly)
+
+        if index >= 0:
+            self.template_selector.setCurrentIndex(index)
+        else:
+            self.template_selector.setCurrentIndex(0)
+        
+        self.output_dir_input.setText(data.get("output_dir", ""))
+
+        replacements = data.get("replacements", {})
+        for key, value in replacements.items():
+            if key in self.fields:
+                self.fields[key].setText(value)
+    
     def load_config_json(self):
 
         path, _ = QFileDialog.getOpenFileName(
@@ -445,19 +527,11 @@ class MainWindow(QMainWindow):
             "MyProject Config (*.myproject.json)"
         )
 
-        if not path:
-            return
+        self._load_from_path(path)
+        
+    def load_default_config_json(self):
 
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-
-        self.template_selector.setCurrentText(data.get("template", ""))
-        self.output_dir_input.setText(data.get("output_dir", ""))
-
-        replacements = data.get("replacements", {})
-        for key, value in replacements.items():
-            if key in self.fields:
-                self.fields[key].setText(value)
+        self._load_from_path(DEFAULT_PROJECT_PATH)
 
     # ============================================================
     # Misc
@@ -468,6 +542,12 @@ class MainWindow(QMainWindow):
             os.startfile(CONFIG_PATH)
         else:
             os.system(f'xdg-open "{CONFIG_PATH}"')
+
+    def open_default_json(self):
+        if os.name == 'nt':
+            os.startfile(DEFAULT_PROJECT_PATH)
+        else:
+            os.system(f'xdg-open "{DEFAULT_PROJECT_PATH}"')
 
     def open_about(self):
         data = {
