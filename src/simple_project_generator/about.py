@@ -1,6 +1,6 @@
 # about.py
 
-__version__ = "0.1.4"
+__version__ = "0.1.5"
 __package__ = "simple_project_generator"
 __program_name__ = "simple-project-generator"
 __author__ = "Fernando Pujaico Rivera"
