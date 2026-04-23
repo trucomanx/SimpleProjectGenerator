@@ -26,7 +26,9 @@ python -m PyInstaller --onefile --windowed --name simple_project_generator --add
 '''
 
 from simple_project_generator.program import main
+import os
 
 if __name__ == "__main__":
+    os.environ["QT_QPA_PLATFORM"] = "xcb"
     main()
 
