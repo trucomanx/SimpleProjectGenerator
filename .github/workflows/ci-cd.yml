@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-22.04   # ✅ FIX: compatibilidade glibc
             name: linux
             exe_suffix: ""
           - os: windows-latest
@@ -38,7 +38,7 @@ jobs:
           python-version: "3.11"
 
       # ============================================================
-      # 3. INSTALL DEPENDENCIES (NO VENV - IMPORTANT)
+      # 3. INSTALL DEPENDENCIES (NO VENV)
       # ============================================================
       - name: Install dependencies
         shell: bash
@@ -48,10 +48,10 @@ jobs:
           pip install -r requirements.txt
 
       # ============================================================
-      # 4. BUILD (LINUX)
+      # 4. BUILD (LINUX - UBUNTU 22.04)
       # ============================================================
       - name: Build with PyInstaller (Linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-22.04'
         shell: bash
         run: |
           cd src
