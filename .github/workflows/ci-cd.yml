@@ -1,0 +1,87 @@
+name: CI/CD PyInstaller Build
+
+on:
+  push:
+    branches:
+      - "**"
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            name: linux
+            sep: ":"
+            exe_suffix: ""
+          - os: windows-latest
+            name: windows
+            sep: ";"
+            exe_suffix: ".exe"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Create venv and install dependencies
+        shell: bash
+        run: |
+          python -m venv venv
+          source venv/bin/activate || venv\Scripts\activate
+
+          python -m pip install --upgrade pip
+          pip install pyinstaller pyinstaller-hooks-contrib
+          pip install -r requirements.txt
+
+      - name: Build with PyInstaller (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
+        run: |
+          source venv/bin/activate
+
+          cd src
+          python -m PyInstaller --onefile --windowed \
+            --name simple_project_generator \
+            --add-data "simple_project_generator/icons:icons" \
+            --add-data "simple_project_generator/data:data" \
+            --collect-all PyQt5 \
+            program_launcher.py
+
+      - name: Build with PyInstaller (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          venv\Scripts\activate
+
+          cd src
+          python -m PyInstaller --onefile --windowed `
+            --name simple_project_generator `
+            --add-data "simple_project_generator/icons;icons" `
+            --add-data "simple_project_generator/data;data" `
+            --collect-all PyQt5 `
+            program_launcher.py
+
+      - name: Upload CI artifact (expires in 1 day)
+        if: startsWith(github.ref, 'refs/heads/')
+        uses: actions/upload-artifact@v4
+        with:
+          name: simple_project_generator-${{ matrix.name }}
+          path: src/dist/
+          retention-days: 1
+
+      - name: Upload Release artifact (on tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: src/dist/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
