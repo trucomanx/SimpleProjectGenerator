@@ -25,10 +25,18 @@ python -m PyInstaller --onefile --windowed --name simple_project_generator --add
 
 '''
 
-from simple_project_generator.program import main
 import os
+from PyQt5.QtCore import QLibraryInfo
+
+os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = QLibraryInfo.location(
+    QLibraryInfo.PluginsPath
+)
+
+from simple_project_generator.program import main
 
 if __name__ == "__main__":
-    os.environ["QT_QPA_PLATFORM"] = "xcb"
+    import os
+
+    
     main()
 
