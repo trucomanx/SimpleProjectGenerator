@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04   # ✅ FIX: compatibilidade glibc
+          - os: ubuntu-22.04
             name: linux
             exe_suffix: ""
           - os: windows-latest
@@ -38,9 +38,33 @@ jobs:
           python-version: "3.11"
 
       # ============================================================
-      # 3. INSTALL DEPENDENCIES (NO VENV)
+      # 3. SYSTEM DEPENDENCIES (LINUX ONLY)
       # ============================================================
-      - name: Install dependencies
+      - name: Install Linux system dependencies (Qt/xcb fix)
+        if: matrix.os == 'ubuntu-22.04'
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libxcb-xinerama0 \
+            libxkbcommon-x11-0 \
+            libxcb-cursor0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-randr0 \
+            libxcb-render-util0 \
+            libxcb-shape0 \
+            libxcb-xfixes0 \
+            libx11-xcb1 \
+            libglib2.0-0 \
+            libgl1 \
+            libegl1
+
+      # ============================================================
+      # 4. INSTALL PYTHON DEPENDENCIES
+      # ============================================================
+      - name: Install Python dependencies
         shell: bash
         run: |
           python -m pip install --upgrade pip
@@ -48,11 +72,13 @@ jobs:
           pip install -r requirements.txt
 
       # ============================================================
-      # 4. BUILD (LINUX - UBUNTU 22.04)
+      # 5. BUILD (LINUX)
       # ============================================================
       - name: Build with PyInstaller (Linux)
         if: matrix.os == 'ubuntu-22.04'
         shell: bash
+        env:
+          QT_QPA_PLATFORM: offscreen
         run: |
           cd src
 
@@ -64,7 +90,7 @@ jobs:
             program_launcher.py
 
       # ============================================================
-      # 5. BUILD (WINDOWS)
+      # 6. BUILD (WINDOWS)
       # ============================================================
       - name: Build with PyInstaller (Windows)
         if: matrix.os == 'windows-latest'
@@ -80,7 +106,7 @@ jobs:
             program_launcher.py
 
       # ============================================================
-      # 6. ARTIFACT (CI BUILDS - 1 DAY EXPIRY)
+      # 7. ARTIFACT (CI BUILDS - 1 DAY)
       # ============================================================
       - name: Upload CI artifact (expires in 1 day)
         if: startsWith(github.ref, 'refs/heads/')
@@ -91,7 +117,7 @@ jobs:
           retention-days: 1
 
       # ============================================================
-      # 7. RELEASE (ONLY WHEN TAG IS CREATED)
+      # 8. RELEASE (ON TAG)
       # ============================================================
       - name: Upload Release artifact (on tag)
         if: startsWith(github.ref, 'refs/tags/')
