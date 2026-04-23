@@ -12,43 +12,50 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-latest
             name: linux
-            sep: ":"
             exe_suffix: ""
           - os: windows-latest
             name: windows
-            sep: ";"
             exe_suffix: ".exe"
 
     steps:
+      # ============================================================
+      # 1. CHECKOUT
+      # ============================================================
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # ============================================================
+      # 2. SETUP PYTHON
+      # ============================================================
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Create venv and install dependencies
+      # ============================================================
+      # 3. INSTALL DEPENDENCIES (NO VENV - IMPORTANT)
+      # ============================================================
+      - name: Install dependencies
         shell: bash
         run: |
-          python -m venv venv
-          source venv/bin/activate || venv\Scripts\activate
-
           python -m pip install --upgrade pip
           pip install pyinstaller pyinstaller-hooks-contrib
           pip install -r requirements.txt
 
+      # ============================================================
+      # 4. BUILD (LINUX)
+      # ============================================================
       - name: Build with PyInstaller (Linux)
         if: matrix.os == 'ubuntu-latest'
         shell: bash
         run: |
-          source venv/bin/activate
-
           cd src
+
           python -m PyInstaller --onefile --windowed \
             --name simple_project_generator \
             --add-data "simple_project_generator/icons:icons" \
@@ -56,13 +63,15 @@ jobs:
             --collect-all PyQt5 \
             program_launcher.py
 
+      # ============================================================
+      # 5. BUILD (WINDOWS)
+      # ============================================================
       - name: Build with PyInstaller (Windows)
         if: matrix.os == 'windows-latest'
         shell: pwsh
         run: |
-          venv\Scripts\activate
-
           cd src
+
           python -m PyInstaller --onefile --windowed `
             --name simple_project_generator `
             --add-data "simple_project_generator/icons;icons" `
@@ -70,6 +79,9 @@ jobs:
             --collect-all PyQt5 `
             program_launcher.py
 
+      # ============================================================
+      # 6. ARTIFACT (CI BUILDS - 1 DAY EXPIRY)
+      # ============================================================
       - name: Upload CI artifact (expires in 1 day)
         if: startsWith(github.ref, 'refs/heads/')
         uses: actions/upload-artifact@v4
@@ -78,6 +90,9 @@ jobs:
           path: src/dist/
           retention-days: 1
 
+      # ============================================================
+      # 7. RELEASE (ONLY WHEN TAG IS CREATED)
+      # ============================================================
       - name: Upload Release artifact (on tag)
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
