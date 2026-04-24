@@ -2,3 +2,5 @@
 /src/py_project_generator/modules/__pycache__/
 /src/simple_project_generator/__pycache__/
 /src/simple_project_generator/modules/__pycache__/
+/src/dist
+/src/simple_project_generator.egg-info/
