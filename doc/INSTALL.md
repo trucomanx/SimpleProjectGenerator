@@ -1,6 +1,6 @@
 # simple-project-generator
 
-my pypi project generator
+My pypi project generator
 
 
 ## Install from PYPI
