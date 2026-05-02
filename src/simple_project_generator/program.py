@@ -576,10 +576,13 @@ class MainWindow(QMainWindow):
 def main():
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
+    extras=""
+
     create_desktop_directory()    
     create_desktop_menu()
     create_desktop_file(os.path.join("~",".local","share","applications"), 
-                        program_name=about.__program_name__)
+                        program_name=about.__program_name__,
+                        extras=extras)
     
     for n in range(len(sys.argv)):
         if sys.argv[n] == "--autostart":
@@ -587,14 +590,16 @@ def main():
             create_desktop_menu(overwrite = True)
             create_desktop_file(os.path.join("~",".config","autostart"), 
                                 overwrite=True, 
-                                program_name=about.__program_name__)
+                                program_name=about.__program_name__,
+                                extras=extras)
             return
         if sys.argv[n] == "--applications":
             create_desktop_directory(overwrite = True)
             create_desktop_menu(overwrite = True)
             create_desktop_file(os.path.join("~",".local","share","applications"), 
                                 overwrite=True, 
-                                program_name=about.__program_name__)
+                                program_name=about.__program_name__,
+                                extras=extras)
             return
     
     app = QApplication(sys.argv)
