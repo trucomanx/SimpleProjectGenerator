@@ -147,7 +147,7 @@ DEFAULT_CONTENT = {
         "{REPOSITORY_NAME}": {
             "label": "Repository name:",
             "placeholder": "MyAwesomeProgram",
-            "tooltip": "Repository short name, this is used to generate https://github.com/trucomanx/MyAwesomeProgram"
+            "tooltip": "Repository short name, this is used to generate https://github.com/trucomanx-desktop/MyAwesomeProgram"
         },
         "{FUNDING_PAGE}": {
             "label": "Funding page:",
@@ -235,7 +235,7 @@ class MainWindow(QMainWindow):
         self.output_dir_input.setToolTip(CONFIG["tooltip_output_dir_input"])
 
         self.output_browse_button = QPushButton(CONFIG["button_browse"])
-        self.output_browse_button.setIcon(QIcon.fromTheme("folder-open"))
+        self.output_browse_button.setIcon(QIcon(resource_path("icons", "folder-open.png")))
         self.output_browse_button.setFixedWidth(110)
         self.output_browse_button.setToolTip(CONFIG["button_browse_tooltip"])
         self.output_browse_button.clicked.connect(self.select_output_directory)
@@ -283,7 +283,7 @@ class MainWindow(QMainWindow):
 
         # ---------------- Save ----------------
         self.save_action = QAction(
-            QIcon.fromTheme("document-save"),
+            QIcon(resource_path("icons", "download-green.png")),
             CONFIG["toolbar_save"],
             self
         )
@@ -293,7 +293,7 @@ class MainWindow(QMainWindow):
 
         # ---------------- Load ----------------
         self.load_action = QAction(
-            QIcon.fromTheme("document-open"),
+            QIcon(resource_path("icons", "document-open.png")),
             CONFIG["toolbar_load"],
             self
         )
@@ -303,7 +303,7 @@ class MainWindow(QMainWindow):
 
         # ---------------- Load template ----------------
         self.load_default_action = QAction(
-            QIcon.fromTheme("document-open"),
+            QIcon(resource_path("icons", "document-open.png")),
             CONFIG["toolbar_load_default"],
             self
         )
@@ -319,7 +319,7 @@ class MainWindow(QMainWindow):
 
         # ---------------- edit template ----------------
         self.edit_default_action = QAction(
-            QIcon.fromTheme("document-properties"),
+            QIcon(resource_path("icons", "text-configure.png")),
             CONFIG["toolbar_edit_default"],
             self
         )
@@ -329,7 +329,7 @@ class MainWindow(QMainWindow):
 
         # ---------------- Configure ----------------
         configure_action = QAction(
-            QIcon.fromTheme("document-properties"),
+            QIcon(resource_path("icons", "text-configure.png")),
             CONFIG["toolbar_configure"],
             self
         )
@@ -339,7 +339,7 @@ class MainWindow(QMainWindow):
 
         # ---------------- About ----------------
         about_action = QAction(
-            QIcon.fromTheme("help-about"),
+            QIcon(resource_path("icons", "status_help.png")),
             CONFIG["toolbar_about"],
             self
         )
@@ -349,7 +349,7 @@ class MainWindow(QMainWindow):
 
         # ---------------- Coffee ----------------
         coffee_action = QAction(
-            QIcon.fromTheme("emblem-favorite"),
+            QIcon(resource_path("icons", "emote-love.png")),
             CONFIG["toolbar_coffee"],
             self
         )

@@ -21,7 +21,7 @@ simple-project-generator
 Installing `simple-project-generator` program
 
 ```bash
-git clone https://github.com/trucomanx/SimpleProjectGenerator.git
+git clone https://github.com/trucomanx-desktop/SimpleProjectGenerator.git
 cd SimpleProjectGenerator
 pip install -r requirements.txt
 cd src

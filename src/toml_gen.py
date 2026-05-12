@@ -61,7 +61,7 @@ dependencies = [
 packages = ["{__package__}", "{__package__}.modules"]
 
 [tool.setuptools.package-data]
-"{__package__}" = [ "icons/logo.png", 
+"{__package__}" = [ "icons/*.png", 
                     "data/pyqt5_project_template_1.zip", 
                     "data/cmd_project_template_1.zip", 
                     "data/cmd_project_simple_1.zip" ]
