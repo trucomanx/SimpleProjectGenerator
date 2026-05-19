@@ -35,8 +35,5 @@ os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = QLibraryInfo.location(
 from simple_project_generator.program import main
 
 if __name__ == "__main__":
-    import os
-
-    
     main()
 
